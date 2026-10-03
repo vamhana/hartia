@@ -129,6 +129,12 @@ const jsonLd = {
           <span class="mono">{SITE_TITLE}</span>
           <span class="site-footer__sep">·</span>
           <span>{AUTHOR}</span>
+          <span class="site-footer__sep">·</span>
+          <span
+            class="site-footer__counter"
+            data-visit-counter
+            aria-live="polite"
+          ></span>
         </p>
       </div>
     </footer>
@@ -152,6 +158,20 @@ const jsonLd = {
           })
         );
       }
+    </script>
+    <script>
+      // Публичный счётчик посещений GoatCounter
+      (function () {
+        const el = document.querySelector('[data-visit-counter]');
+        if (!el) return;
+        fetch('https://vamhana.goatcounter.com/counter/TOTAL.json')
+          .then((r) => (r.ok ? r.json() : null))
+          .then((d) => {
+            if (!d || !d.count) return;
+            el.textContent = `визитов: ${d.count}`;
+          })
+          .catch(() => {});
+      })();
     </script>
   </body>
 </html>
@@ -293,6 +313,10 @@ const jsonLd = {
   }
 
   .site-footer__sep { margin-inline: 0.6rem; color: var(--gold-dim); }
+  .site-footer__counter {
+    color: var(--cyan);
+    font-variant-numeric: tabular-nums;
+  }
 
   @media (max-width: 780px) {
     .nav-toggle { display: flex; }
