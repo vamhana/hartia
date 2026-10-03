@@ -71,7 +71,7 @@ const books = [
       <ul class="books__grid">
         {books.map((book) => (
           <li>
-            <a href={url(`/${book.slug}`)} class="book-card">
+            <a href={url(`/charter/${book.slug}`)} class="book-card">
               <span class="book-card__num">{book.num}</span>
               <h3 class="book-card__title">{book.title}</h3>
               <p class="book-card__desc">{book.desc}</p>

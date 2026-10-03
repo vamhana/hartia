@@ -1,0 +1,32 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import '../styles/global.css';
+
+const title = 'Сообщества';
+const description = 'Сеть сообществ Хартии. Раздел в разработке.';
+---
+
+<BaseLayout title={title} description={description}>
+  <section class="placeholder">
+    <div class="container prose">
+      <p class="mono">Раздел в разработке</p>
+      <h1>Сообщества</h1>
+      <p>
+        Здесь появится карта сети: аккредитованные общины, узлы
+        конвергенции, мосты Потоков между ними.
+      </p>
+      <p>Пока этот раздел в работе. Возвращайтесь — скоро.</p>
+      <p><a href={`${import.meta.env.BASE_URL.replace(/\/$/, '')}/`}>← На главную</a></p>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .placeholder {
+    padding-block: 6rem 5rem;
+    text-align: center;
+  }
+  .placeholder .mono { color: var(--gold); margin-bottom: 1.5rem; }
+  .placeholder h1 { margin-bottom: 2rem; }
+  .placeholder p { color: var(--text-secondary); }
+</style>

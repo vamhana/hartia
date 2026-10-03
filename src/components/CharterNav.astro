@@ -4,8 +4,8 @@ interface NavArticle {
   title: string;
   part: number;
   partTitle: string;
-  slug: string;   // '1-10'
-  href: string;   // '/hartia/charter/kniga-1/1-10'
+  slug: string;
+  href: string;
   isCurrent: boolean;
 }
 
@@ -18,7 +18,6 @@ interface Props {
 
 const { book, bookTitle, bookHref, articles } = Astro.props;
 
-// Сгруппировать по частям
 const byPart: Record<number, { partTitle: string; items: NavArticle[] }> = {};
 for (const a of articles) {
   if (!byPart[a.part]) {
@@ -32,7 +31,18 @@ const parts = Object.keys(byPart)
   .sort((a, b) => a - b);
 ---
 
-<aside class="charter-nav">
+<button class="charter-nav__toggle" data-nav-toggle aria-label="Открыть оглавление">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+    <line x1="3" y1="6" x2="21" y2="6"/>
+    <line x1="3" y1="12" x2="21" y2="12"/>
+    <line x1="3" y1="18" x2="21" y2="18"/>
+  </svg>
+  <span class="mono">Оглавление</span>
+</button>
+
+<aside class="charter-nav" data-charter-nav>
+  <button class="charter-nav__close" data-nav-close aria-label="Закрыть">×</button>
+
   <a href={bookHref} class="charter-nav__book">
     <span class="charter-nav__book-label mono">Книга {book}</span>
     <span class="charter-nav__book-title">{bookTitle}</span>
@@ -68,7 +78,76 @@ const parts = Object.keys(byPart)
   </nav>
 </aside>
 
+<script>
+  const toggle = document.querySelector('[data-nav-toggle]');
+  const nav = document.querySelector('[data-charter-nav]');
+  const close = document.querySelector('[data-nav-close]');
+
+  if (toggle && nav) {
+    toggle.addEventListener('click', () => {
+      nav.classList.add('is-open');
+      document.body.style.overflow = 'hidden';
+    });
+  }
+
+  if (close && nav) {
+    close.addEventListener('click', () => {
+      nav.classList.remove('is-open');
+      document.body.style.overflow = '';
+    });
+  }
+
+  nav?.querySelectorAll('a').forEach((a) => {
+    a.addEventListener('click', () => {
+      nav.classList.remove('is-open');
+      document.body.style.overflow = '';
+    });
+  });
+</script>
+
 <style>
+  .charter-nav__toggle {
+    display: none;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--gold-dim);
+    background: var(--bg-raised);
+    color: var(--gold);
+    font-size: 0.85rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all var(--transition);
+    border-radius: 2px;
+  }
+
+  .charter-nav__toggle:hover {
+    border-color: var(--gold);
+    background: var(--bg-subtle);
+  }
+
+  .charter-nav__close {
+    display: none;
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 2.5rem;
+    height: 2.5rem;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: var(--text-secondary);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: color var(--transition);
+    z-index: 10;
+  }
+
+  .charter-nav__close:hover { color: var(--gold-bright); }
+
   .charter-nav {
     position: sticky;
     top: 5rem;
@@ -165,13 +244,28 @@ const parts = Object.keys(byPart)
   }
 
   @media (max-width: 960px) {
+    .charter-nav__toggle { display: inline-flex; }
+
     .charter-nav {
-      position: static;
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: min(85vw, 360px);
       max-height: none;
-      border-right: none;
-      border-bottom: 1px solid var(--gold-dim);
-      padding: 1.5rem 0;
-      margin-bottom: 2rem;
+      padding: 4rem 1.5rem 2rem;
+      background: var(--bg-deep);
+      border-right: 1px solid var(--gold-dim);
+      transform: translateX(-100%);
+      transition: transform 250ms cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 100;
+      overflow-y: auto;
     }
+
+    .charter-nav.is-open { transform: translateX(0); }
+
+    .charter-nav__close { display: flex; }
+
+    .charter-nav__book { padding-top: 0.5rem; }
   }
 </style>
