@@ -65,6 +65,16 @@ const jsonLd = {
     <!-- JSON-LD -->
     <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
 
+
+    <!-- GoatCounter Analytics -->
+    {import.meta.env.PROD && (
+      <script
+        data-goatcounter="https://vamhana.goatcounter.com/count"
+        async
+        src="//gc.zgo.at/count.js"
+      ></script>
+    )}
+
     <link rel="icon" type="image/svg+xml" href={url('/favicon.svg')} />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
