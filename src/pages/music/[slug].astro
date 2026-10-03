@@ -60,15 +60,15 @@ const pageDesc = track.description;
           </div>
 
           <div class="track__actions">
-          <a
-            href={downloadUrl}
-            class="track-card__download"
-            download
-            data-download={slug}
-            data-goatcounter-click={`download-${slug}`}
-          >
-            ↓ Скачать
-          </a>
+            <a
+              href={downloadUrl}
+              class="btn btn--primary"
+              download
+              data-download={track.slug}
+              data-goatcounter-click={`download-${track.slug}`}
+            >
+              ↓ Скачать MP3
+            </a>
             <a href={`${base}/music`} class="btn">← Все треки</a>
           </div>
         </div>
