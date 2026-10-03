@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <rect width="400" height="400" fill="#13110c"/>
+  <text x="200" y="210" text-anchor="middle"
+        font-family="serif" font-size="64" fill="#c9a961" opacity="0.6">✶</text>
+  <text x="200" y="270" text-anchor="middle"
+        font-family="monospace" font-size="14" fill="#6b6353"
+        letter-spacing="4">ХАРТИЯ 5.0</text>
+</svg>
