@@ -6,14 +6,34 @@ interface Props {
 
 const {
   title,
-  description = 'Хартия 5.0 — сводный регламент новой цивилизации.',
+  description = 'Хартия 5.0 — протокол построения планетарной цивилизации, основанной на развитии, а не накоплении.',
 } = Astro.props;
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const url = (path: string) => `${base}${path.startsWith('/') ? path : `/${path}`}`;
 
-const siteTitle = 'Хартия 5.0';
-const fullTitle = title === siteTitle ? title : `${title} — ${siteTitle}`;
+const SITE_TITLE = 'Хартия 5.0';
+const SITE_SUBTITLE = 'Протокол Цивилизации Будущего';
+const SITE_URL = 'https://vamhana.github.io/hartia';
+const AUTHOR = 'Первый Архитектор';
+
+const pageTitle = title === SITE_TITLE
+  ? `${SITE_TITLE} — ${SITE_SUBTITLE}`
+  : `${title} — ${SITE_TITLE}`;
+
+const canonical = new URL(Astro.url.pathname, SITE_URL).toString();
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Book',
+  name: `${SITE_TITLE} — ${SITE_SUBTITLE}`,
+  alternateName: 'Xartia 5.0',
+  author: { '@type': 'Person', name: AUTHOR },
+  inLanguage: 'ru',
+  genre: ['Философия', 'Социальная архитектура', 'Футурология'],
+  abstract: description,
+  url: SITE_URL,
+};
 ---
 
 <!doctype html>
@@ -21,10 +41,29 @@ const fullTitle = title === siteTitle ? title : `${title} — ${siteTitle}`;
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>{pageTitle}</title>
     <meta name="description" content={description} />
+    <meta name="author" content={AUTHOR} />
     <meta name="generator" content={Astro.generator} />
 
-    <title>{fullTitle}</title>
+    <link rel="canonical" href={canonical} />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="book" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:site_name" content={`${SITE_TITLE} — ${SITE_SUBTITLE}`} />
+    <meta property="og:locale" content="ru_RU" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
+
+    <!-- JSON-LD -->
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
 
     <link rel="icon" type="image/svg+xml" href={url('/favicon.svg')} />
 
@@ -40,10 +79,23 @@ const fullTitle = title === siteTitle ? title : `${title} — ${siteTitle}`;
       <div class="container site-header__inner">
         <a href={url('/')} class="brand">
           <span class="brand__mark" aria-hidden="true">✶</span>
-          <span class="brand__name">Хартия 5.0</span>
+          <span class="brand__text">
+            <span class="brand__name">Хартия 5.0</span>
+            <span class="brand__sub">Протокол Цивилизации Будущего</span>
+          </span>
         </a>
 
-        <nav class="site-nav" aria-label="Основная навигация">
+        <button
+          class="nav-toggle"
+          type="button"
+          aria-label="Открыть меню"
+          aria-expanded="false"
+          aria-controls="site-nav"
+        >
+          <span></span><span></span><span></span>
+        </button>
+
+        <nav class="site-nav" id="site-nav" aria-label="Основная навигация">
           <a href={url('/charter')}>Хартия</a>
           <a href={url('/napravleniya')}>Направления</a>
           <a href={url('/soobschestva')}>Сообщества</a>
@@ -64,19 +116,40 @@ const fullTitle = title === siteTitle ? title : `${title} — ${siteTitle}`;
           А мудрый бунт — высший пилотаж свободы.»
         </p>
         <p class="site-footer__meta">
-          <span class="mono">Хартия 5.0</span>
+          <span class="mono">{SITE_TITLE}</span>
           <span class="site-footer__sep">·</span>
-          <span>Первый Архитектор</span>
+          <span>{AUTHOR}</span>
         </p>
       </div>
     </footer>
+
+    <script>
+      // Бургер-меню
+      const toggle = document.querySelector('.nav-toggle');
+      const nav = document.querySelector('.site-nav');
+      if (toggle && nav) {
+        toggle.addEventListener('click', () => {
+          const open = toggle.getAttribute('aria-expanded') === 'true';
+          toggle.setAttribute('aria-expanded', String(!open));
+          nav.classList.toggle('is-open', !open);
+          document.body.style.overflow = !open ? 'hidden' : '';
+        });
+        nav.querySelectorAll('a').forEach((a) =>
+          a.addEventListener('click', () => {
+            toggle.setAttribute('aria-expanded', 'false');
+            nav.classList.remove('is-open');
+            document.body.style.overflow = '';
+          })
+        );
+      }
+    </script>
   </body>
 </html>
 
 <style>
   .site-header {
     border-bottom: 1px solid var(--gold-dim);
-    padding-block: 1.25rem;
+    padding-block: 1rem;
     position: sticky;
     top: 0;
     background: color-mix(in srgb, var(--bg-deep) 92%, transparent);
@@ -89,16 +162,13 @@ const fullTitle = title === siteTitle ? title : `${title} — ${siteTitle}`;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 2rem;
+    gap: 1rem;
   }
 
   .brand {
     display: inline-flex;
     align-items: center;
-    gap: 0.6rem;
-    font-family: var(--font-display);
-    font-size: 1.4rem;
-    letter-spacing: 0.01em;
+    gap: 0.65rem;
     color: var(--text-primary);
     transition: color var(--transition);
   }
@@ -107,11 +177,34 @@ const fullTitle = title === siteTitle ? title : `${title} — ${siteTitle}`;
 
   .brand__mark {
     color: var(--gold);
-    font-size: 1.1rem;
+    font-size: 1.35rem;
+    line-height: 1;
     transition: transform var(--transition);
   }
 
   .brand:hover .brand__mark { transform: rotate(90deg); }
+
+  .brand__text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.15;
+  }
+
+  .brand__name {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+  }
+
+  .brand__sub {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-top: 0.1rem;
+  }
 
   .site-nav {
     display: flex;
@@ -132,9 +225,32 @@ const fullTitle = title === siteTitle ? title : `${title} — ${siteTitle}`;
   .site-nav__music { color: var(--cyan); }
   .site-nav__music:hover { color: var(--gold-bright); }
 
-  .site-main {
-    flex: 1;
+  .nav-toggle {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    width: 34px;
+    height: 34px;
+    padding: 6px;
   }
+
+  .nav-toggle span {
+    display: block;
+    height: 1px;
+    background: var(--gold);
+    transition: all var(--transition);
+  }
+
+  .nav-toggle[aria-expanded="true"] span:nth-child(1) {
+    transform: translateY(6px) rotate(45deg);
+  }
+  .nav-toggle[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
+  .nav-toggle[aria-expanded="true"] span:nth-child(3) {
+    transform: translateY(-6px) rotate(-45deg);
+  }
+
+  .site-main { flex: 1; }
 
   .site-footer {
     border-top: 1px solid var(--gold-dim);
@@ -168,9 +284,27 @@ const fullTitle = title === siteTitle ? title : `${title} — ${siteTitle}`;
 
   .site-footer__sep { margin-inline: 0.6rem; color: var(--gold-dim); }
 
-  @media (max-width: 720px) {
-    .site-nav { font-size: 0.7rem; gap: 1rem; }
-    .brand { font-size: 1.15rem; }
-    .site-footer__quote { font-size: 1rem; }
+  @media (max-width: 780px) {
+    .nav-toggle { display: flex; }
+    .brand__sub { display: none; }
+
+    .site-nav {
+      position: fixed;
+      inset: 0;
+      background: var(--bg-deep);
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 2rem;
+      font-size: 1.1rem;
+      letter-spacing: 0.2em;
+      transform: translateX(100%);
+      transition: transform 250ms cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 40;
+    }
+
+    .site-nav.is-open { transform: translateX(0); }
+
+    .site-nav a { font-size: 1.1rem; }
   }
 </style>
