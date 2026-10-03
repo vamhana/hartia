@@ -1,0 +1,161 @@
+/* ---------- RESET ---------- */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+img, svg { display: block; max-width: 100%; }
+button { font: inherit; color: inherit; cursor: pointer; background: none; border: none; }
+a { color: inherit; text-decoration: none; }
+
+/* ---------- VARIABLES ---------- */
+:root {
+  /* Фон */
+  --bg-deep:      #0a0906;
+  --bg-raised:    #13110c;
+  --bg-subtle:    #1a1712;
+
+  /* Текст */
+  --text-primary:   #e8dcc0;
+  --text-secondary: #a89b7e;
+  --text-muted:     #6b6353;
+
+  /* Акценты */
+  --gold:         #c9a961;
+  --gold-bright:  #e3c887;
+  --gold-dim:     #4a3f2a;
+
+  /* Семантика (для Атласа и бейджей) */
+  --cyan:         #7fd4d4;
+  --core:         #c9a961;
+  --transitional: #8a9bb5;
+  --experimental: #9b7fb5;
+
+  /* Шрифты */
+  --font-display: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+  --font-body:    'Spectral', Georgia, 'Times New Roman', serif;
+  --font-mono:    'JetBrains Mono', 'Courier New', monospace;
+
+  /* Ширина */
+  --max-w:      72ch;
+  --max-w-wide: 1280px;
+
+  --transition: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ---------- BASE ---------- */
+html, body {
+  background: var(--bg-deep);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 18px;
+  line-height: 1.7;
+  font-feature-settings: 'liga', 'kern';
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------- TYPOGRAPHY ---------- */
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.005em;
+  color: var(--text-primary);
+}
+
+h1 { font-size: clamp(2.5rem, 6vw, 4.5rem); }
+h2 { font-size: clamp(1.75rem, 4vw, 2.75rem); }
+h3 { font-size: clamp(1.35rem, 2.5vw, 1.75rem); }
+
+p { margin-bottom: 1.25em; }
+p:last-child { margin-bottom: 0; }
+
+em { font-style: italic; color: var(--text-secondary); }
+strong { font-weight: 500; color: var(--gold-bright); }
+
+/* ---------- LINKS ---------- */
+a {
+  color: var(--gold);
+  transition: color var(--transition);
+}
+a:hover { color: var(--gold-bright); }
+
+/* ---------- LAYOUT ---------- */
+.container {
+  width: 100%;
+  max-width: var(--max-w-wide);
+  margin-inline: auto;
+  padding-inline: 1.5rem;
+}
+
+.prose {
+  max-width: var(--max-w);
+  margin-inline: auto;
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-size: 0.8em;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+/* ---------- SELECTION ---------- */
+::selection {
+  background: var(--gold-dim);
+  color: var(--gold-bright);
+}
+
+/* ---------- SCROLLBAR ---------- */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--bg-deep); }
+::-webkit-scrollbar-thumb { background: var(--gold-dim); border-radius: 5px; }
+::-webkit-scrollbar-thumb:hover { background: var(--gold); }
+
+/* ---------- BUTTONS ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.85rem 1.75rem;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border: 1px solid var(--gold-dim);
+  color: var(--gold);
+  background: transparent;
+  transition: all var(--transition);
+}
+
+.btn:hover {
+  border-color: var(--gold);
+  color: var(--gold-bright);
+  background: var(--bg-subtle);
+}
+
+.btn--primary {
+  background: var(--gold);
+  color: var(--bg-deep);
+  border-color: var(--gold);
+}
+
+.btn--primary:hover {
+  background: var(--gold-bright);
+  border-color: var(--gold-bright);
+  color: var(--bg-deep);
+}
+
+.btn--ghost {
+  border-color: transparent;
+  color: var(--text-secondary);
+}
+
+.btn--ghost:hover {
+  color: var(--cyan);
+}

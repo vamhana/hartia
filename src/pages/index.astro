@@ -1,17 +1,311 @@
 ---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import '../styles/global.css';
 
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const url = (path: string) => `${base}${path.startsWith('/') ? path : `/${path}`}`;
+
+function plural(n: number, forms: [string, string, string]): string {
+  const n10 = n % 10;
+  const n100 = n % 100;
+  if (n10 === 1 && n100 !== 11) return forms[0];
+  if (n10 >= 2 && n10 <= 4 && (n100 < 10 || n100 >= 20)) return forms[1];
+  return forms[2];
+}
+
+const epigraph = [
+  'Мир, в котором мы живём, — тюрьма со своими камерами:',
+  'в какой-то лучше, в какой-то хуже.',
+  '',
+  'У этой тюрьмы два начальника — власть и деньги.',
+  'Пока они управляют человеком, он заключён.',
+  '',
+  'Освобождение начинается с лишения их власти над человеком.',
+  'Свобода — это не когда исчезает решётка.',
+  'Свобода — когда ты перестаёшь видеть небо сквозь неё.',
+];
+
+const books = [
+  { num: 'I',    slug: 'kniga-1', title: 'Основы и архитектура',        parts: 6, desc: 'Преамбула, ценности, неизменяемое ядро, направления, ячейки, роли.' },
+  { num: 'II',   slug: 'kniga-2', title: 'Процессы и процедуры',        parts: 8, desc: 'Жизненный цикл сигнала, Коннект, План реализации, сбои, избыток.' },
+  { num: 'III',  slug: 'kniga-3', title: 'Управление и контроль',       parts: 5, desc: 'Балансировка, Верификация, Жюри, Обнуление, Хранители.' },
+  { num: 'IV',   slug: 'kniga-4', title: 'Развитие и самокоррекция',    parts: 7, desc: 'Новые профессии, пятилетний пересмотр, кванты, самообнаружение.' },
+  { num: 'V',    slug: 'kniga-5', title: 'Человек, сообщества, мир',    parts: 8, desc: 'Путь участника, мастерство, дети, Шлюз, конвергенция государств.' },
+  { num: 'VI',   slug: 'kniga-6', title: 'Экстренные режимы',           parts: 5, desc: 'Красный Контур, Стальной Колокол, Квант оружия, ПТТ, адаптация.' },
+  { num: 'VII',  slug: 'kniga-7', title: 'Заключительные положения',    parts: 4, desc: 'Языковой протокол, санкции, порядок изменения, философия.' },
+  { num: 'VIII', slug: 'kniga-8', title: 'Экспериментальные протоколы', parts: 2, desc: 'Цифровое ядро Первой сотни. Место для будущего.' },
+];
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<BaseLayout title="Хартия 5.0">
+  <section class="hero">
+    <div class="container">
+      <p class="hero__label">Хартия 5.0 · Сводный регламент · Модульная версия</p>
+
+      <blockquote class="hero__epigraph">
+        {epigraph.map((line) =>
+          line === ''
+            ? <span class="hero__spacer" aria-hidden="true" />
+            : <p>{line}</p>
+        )}
+        <footer class="hero__attribution">— Первый Архитектор</footer>
+      </blockquote>
+
+      <div class="hero__actions">
+        <a href={url('/charter')} class="btn btn--primary">Читать Хартию</a>
+        <a href={url('/music')} class="btn btn--ghost">Слушать музыку бунта →</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="books">
+    <div class="container">
+      <header class="section-head">
+        <span class="section-head__num">VIII</span>
+        <h2 class="section-head__title">Книги</h2>
+        <p class="section-head__sub">Восемь частей. Двести статей. Один протокол.</p>
+      </header>
+
+      <ul class="books__grid">
+        {books.map((book) => (
+          <li>
+            <a href={url(`/${book.slug}`)} class="book-card">
+              <span class="book-card__num">{book.num}</span>
+              <h3 class="book-card__title">{book.title}</h3>
+              <p class="book-card__desc">{book.desc}</p>
+              <span class="book-card__meta">
+                {book.parts} {plural(book.parts, ['часть', 'части', 'частей'])}
+              </span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <section class="manifest">
+    <div class="container prose">
+      <p class="manifest__lead">
+        Мы не создаём общество, в котором проблемы исчезают.
+        Мы создаём общество, в котором проблемы не теряются.
+      </p>
+      <p>
+        Хартия не защищает существующую систему от изменений.
+        Она защищает механизм её осмысленного изменения.
+        Каждые пять лет сама архитектура получает право спросить:
+        «Мы всё ещё устроены правильно?» А каждые пятьдесят — более глубокий вопрос:
+        «Не слишком ли мы устроены? И не пора ли нам выйти за собственные пределы?»
+      </p>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  /* ---------- HERO ---------- */
+  .hero {
+    padding-block: 6rem 5rem;
+    position: relative;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 1px;
+    height: 3rem;
+    background: linear-gradient(to bottom, transparent, var(--gold-dim));
+  }
+
+  .hero__label {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    text-align: center;
+    margin-bottom: 4rem;
+  }
+
+  .hero__epigraph {
+    max-width: 42ch;
+    margin-inline: auto;
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: clamp(1.35rem, 2.5vw, 1.75rem);
+    line-height: 1.5;
+    color: var(--text-primary);
+    text-align: center;
+  }
+
+  .hero__epigraph p {
+    margin-bottom: 0;
+  }
+
+  .hero__spacer {
+    display: block;
+    height: 1.1em;
+  }
+
+  .hero__attribution {
+    margin-top: 2rem;
+    font-family: var(--font-mono);
+    font-style: normal;
+    font-size: 0.8rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+
+  .hero__actions {
+    margin-top: 4rem;
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  /* ---------- SECTION HEAD ---------- */
+  .section-head {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-rows: auto auto;
+    column-gap: 1.25rem;
+    row-gap: 0.25rem;
+    align-items: baseline;
+    margin-bottom: 3rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--gold-dim);
+  }
+
+  .section-head__num {
+    grid-row: 1 / 3;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    letter-spacing: 0.15em;
+    color: var(--gold);
+    padding-top: 0.6rem;
+  }
+
+  .section-head__title {
+    font-size: clamp(1.75rem, 3vw, 2.5rem);
+    margin: 0;
+  }
+
+  .section-head__sub {
+    font-family: var(--font-body);
+    font-style: italic;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    margin: 0;
+  }
+
+  /* ---------- BOOKS ---------- */
+  .books { padding-block: 4rem; }
+
+  .books__grid {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+  }
+
+  .book-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 2rem;
+    border: 1px solid var(--gold-dim);
+    background: var(--bg-raised);
+    transition: all var(--transition);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .book-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--gold), transparent);
+    opacity: 0;
+    transition: opacity var(--transition);
+  }
+
+  .book-card:hover {
+    border-color: var(--gold);
+    background: var(--bg-subtle);
+    transform: translateY(-2px);
+  }
+
+  .book-card:hover::before { opacity: 1; }
+
+  .book-card__num {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+    margin-bottom: 0.75rem;
+  }
+
+  .book-card__title {
+    font-size: 1.5rem;
+    margin-bottom: 0.75rem;
+    transition: color var(--transition);
+  }
+
+  .book-card:hover .book-card__title { color: var(--gold-bright); }
+
+  .book-card__desc {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+    flex: 1;
+  }
+
+  .book-card__meta {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding-top: 1rem;
+    border-top: 1px solid var(--gold-dim);
+  }
+
+  /* ---------- MANIFEST ---------- */
+  .manifest {
+    padding-block: 6rem;
+    margin-top: 4rem;
+    border-top: 1px solid var(--gold-dim);
+  }
+
+  .manifest__lead {
+    font-family: var(--font-display);
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    line-height: 1.35;
+    color: var(--gold-bright);
+    text-align: center;
+    margin-bottom: 2.5rem;
+    font-style: italic;
+  }
+
+  .manifest p:not(.manifest__lead) {
+    color: var(--text-secondary);
+    font-size: 1.05rem;
+  }
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width: 720px) {
+    .books__grid { grid-template-columns: 1fr; }
+    .hero { padding-block: 4rem 3rem; }
+    .hero__label { margin-bottom: 2.5rem; }
+    .hero__actions { margin-top: 3rem; }
+    .section-head { grid-template-columns: 1fr; }
+    .section-head__num { grid-row: auto; padding-top: 0; }
+  }
+</style>

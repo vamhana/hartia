@@ -1,0 +1,176 @@
+---
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const {
+  title,
+  description = 'Хартия 5.0 — сводный регламент новой цивилизации.',
+} = Astro.props;
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const url = (path: string) => `${base}${path.startsWith('/') ? path : `/${path}`}`;
+
+const siteTitle = 'Хартия 5.0';
+const fullTitle = title === siteTitle ? title : `${title} — ${siteTitle}`;
+---
+
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <meta name="generator" content={Astro.generator} />
+
+    <title>{fullTitle}</title>
+
+    <link rel="icon" type="image/svg+xml" href={url('/favicon.svg')} />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Spectral:ital,wght@0,400;0,500;1,400&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container site-header__inner">
+        <a href={url('/')} class="brand">
+          <span class="brand__mark" aria-hidden="true">✶</span>
+          <span class="brand__name">Хартия 5.0</span>
+        </a>
+
+        <nav class="site-nav" aria-label="Основная навигация">
+          <a href={url('/charter')}>Хартия</a>
+          <a href={url('/napravleniya')}>Направления</a>
+          <a href={url('/soobschestva')}>Сообщества</a>
+          <a href={url('/music')} class="site-nav__music">Музыка</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="site-main">
+      <slot />
+    </main>
+
+    <footer class="site-footer">
+      <div class="container site-footer__inner">
+        <p class="site-footer__quote">
+          «Мудрость без действия — это бегство от реальности.
+          Действие без мудрости — это хаос.
+          А мудрый бунт — высший пилотаж свободы.»
+        </p>
+        <p class="site-footer__meta">
+          <span class="mono">Хартия 5.0</span>
+          <span class="site-footer__sep">·</span>
+          <span>Первый Архитектор</span>
+        </p>
+      </div>
+    </footer>
+  </body>
+</html>
+
+<style>
+  .site-header {
+    border-bottom: 1px solid var(--gold-dim);
+    padding-block: 1.25rem;
+    position: sticky;
+    top: 0;
+    background: color-mix(in srgb, var(--bg-deep) 92%, transparent);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    z-index: 50;
+  }
+
+  .site-header__inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 2rem;
+  }
+
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    letter-spacing: 0.01em;
+    color: var(--text-primary);
+    transition: color var(--transition);
+  }
+
+  .brand:hover { color: var(--gold-bright); }
+
+  .brand__mark {
+    color: var(--gold);
+    font-size: 1.1rem;
+    transition: transform var(--transition);
+  }
+
+  .brand:hover .brand__mark { transform: rotate(90deg); }
+
+  .site-nav {
+    display: flex;
+    gap: 1.75rem;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .site-nav a {
+    color: var(--text-secondary);
+    transition: color var(--transition);
+  }
+
+  .site-nav a:hover { color: var(--gold-bright); }
+
+  .site-nav__music { color: var(--cyan); }
+  .site-nav__music:hover { color: var(--gold-bright); }
+
+  .site-main {
+    flex: 1;
+  }
+
+  .site-footer {
+    border-top: 1px solid var(--gold-dim);
+    padding-block: 3rem;
+    margin-top: 6rem;
+    background: var(--bg-raised);
+  }
+
+  .site-footer__inner {
+    max-width: var(--max-w);
+    margin-inline: auto;
+    text-align: center;
+  }
+
+  .site-footer__quote {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 1.15rem;
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+  }
+
+  .site-footer__meta {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--text-muted);
+  }
+
+  .site-footer__sep { margin-inline: 0.6rem; color: var(--gold-dim); }
+
+  @media (max-width: 720px) {
+    .site-nav { font-size: 0.7rem; gap: 1rem; }
+    .brand { font-size: 1.15rem; }
+    .site-footer__quote { font-size: 1rem; }
+  }
+</style>
