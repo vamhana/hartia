@@ -1,0 +1,217 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import '../../../styles/global.css';
+
+export async function getStaticPaths() {
+  const all = await getCollection('charter');
+  const bookNums = [...new Set(all.map((a) => a.data.book))];
+  return bookNums.map((n) => ({
+    params: { book: `kniga-${n}` },
+    props: { bookNum: n, allArticles: all },
+  }));
+}
+
+const { bookNum, allArticles } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const url = (path: string) => `${base}${path.startsWith('/') ? path : `/${path}`}`;
+
+const articles = allArticles
+  .filter((a) => a.data.book === bookNum)
+  .sort((a, b) => a.data.order - b.data.order);
+
+const bookTitle = articles[0]?.data.bookTitle || '';
+
+const roman = ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'];
+
+// Группировка по частям
+const byPart: Record<number, { partTitle: string; items: typeof articles }> = {};
+for (const a of articles) {
+  const p = a.data.part;
+  if (!byPart[p]) {
+    byPart[p] = { partTitle: a.data.partTitle, items: [] };
+  }
+  byPart[p].items.push(a);
+}
+const parts = Object.keys(byPart).map(Number).sort((a, b) => a - b);
+
+const title = `Книга ${roman[bookNum]} — ${bookTitle}`;
+const description = `${bookTitle}: ${articles.length} статей в ${parts.length} частях. Хартия 5.0.`;
+---
+
+<BaseLayout title={title} description={description}>
+  <section class="book-hero">
+    <div class="container">
+      <nav class="crumbs mono">
+        <a href={url('/charter')}>Хартия</a>
+        <span class="crumbs__sep">/</span>
+        <span>Книга {roman[bookNum]}</span>
+      </nav>
+
+      <p class="book-hero__label mono">Книга {roman[bookNum]}</p>
+      <h1 class="book-hero__title">{bookTitle}</h1>
+      <p class="book-hero__meta">
+        {articles.length} статей · {parts.length} частей
+      </p>
+    </div>
+  </section>
+
+  <section class="book-toc">
+    <div class="container">
+      {parts.map((p) => {
+        const group = byPart[p];
+        return (
+          <section class="part">
+            <header class="part__head">
+              <span class="part__num mono">Часть {p}</span>
+              <h2 class="part__title">{group.partTitle}</h2>
+            </header>
+
+            <ul class="part__list">
+              {group.items.map((a) => {
+                const slug = a.data.number.replace(/\./g, '-');
+                const href = url(`/charter/kniga-${bookNum}/${slug}`);
+                return (
+                  <li>
+                    <a href={href} class="article-row">
+                      <span class="article-row__num mono">{a.data.number}</span>
+                      <span class="article-row__title">{a.data.title}</span>
+                      <span class="article-row__arrow" aria-hidden="true">→</span>
+                    </a>
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
+        );
+      })}
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .book-hero {
+    padding-block: 4rem 3rem;
+    border-bottom: 1px solid var(--gold-dim);
+  }
+
+  .crumbs {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-bottom: 2.5rem;
+  }
+
+  .crumbs a { color: var(--text-secondary); }
+  .crumbs a:hover { color: var(--gold-bright); }
+  .crumbs__sep { margin-inline: 0.5rem; color: var(--gold-dim); }
+
+  .book-hero__label {
+    color: var(--gold);
+    margin-bottom: 1rem;
+  }
+
+  .book-hero__title {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    margin-bottom: 1rem;
+    line-height: 1.1;
+  }
+
+  .book-hero__meta {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .book-toc { padding-block: 4rem 5rem; }
+
+  .part {
+    margin-bottom: 3.5rem;
+  }
+
+  .part__head {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 1.25rem;
+    align-items: baseline;
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid var(--gold-dim);
+  }
+
+  .part__num {
+    color: var(--gold);
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+  }
+
+  .part__title {
+    font-size: 1.35rem;
+    font-weight: 500;
+    line-height: 1.3;
+  }
+
+  .part__list {
+    list-style: none;
+    display: grid;
+    gap: 0.25rem;
+  }
+
+  .article-row {
+    display: grid;
+    grid-template-columns: 4rem 1fr auto;
+    gap: 1.25rem;
+    align-items: baseline;
+    padding: 0.85rem 1rem;
+    border-left: 2px solid transparent;
+    transition: all var(--transition);
+    border-radius: 2px;
+  }
+
+  .article-row:hover {
+    background: var(--bg-subtle);
+    border-left-color: var(--gold);
+    padding-left: 1.25rem;
+  }
+
+  .article-row__num {
+    font-size: 0.75rem;
+    color: var(--gold-dim);
+    letter-spacing: 0.08em;
+  }
+
+  .article-row:hover .article-row__num { color: var(--gold); }
+
+  .article-row__title {
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    color: var(--text-primary);
+    line-height: 1.3;
+  }
+
+  .article-row:hover .article-row__title { color: var(--gold-bright); }
+
+  .article-row__arrow {
+    color: var(--gold-dim);
+    transition: all var(--transition);
+    opacity: 0;
+  }
+
+  .article-row:hover .article-row__arrow {
+    color: var(--gold);
+    opacity: 1;
+    transform: translateX(4px);
+  }
+
+  @media (max-width: 640px) {
+    .article-row {
+      grid-template-columns: 3.5rem 1fr;
+      gap: 0.75rem;
+      padding: 0.75rem 0.5rem;
+    }
+    .article-row__arrow { display: none; }
+    .article-row__title { font-size: 1rem; }
+    .part__head { grid-template-columns: 1fr; gap: 0.5rem; }
+  }
+</style>

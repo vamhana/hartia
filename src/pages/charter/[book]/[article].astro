@@ -1,0 +1,253 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import CharterNav from '../../../components/CharterNav.astro';
+import '../../../styles/global.css';
+
+export async function getStaticPaths() {
+  const all = await getCollection('charter');
+  return all.map((a) => ({
+    params: {
+      book: `kniga-${a.data.book}`,
+      article: a.data.number.replace(/\./g, '-'),
+    },
+    props: { article: a, allArticles: all },
+  }));
+}
+
+const { article, allArticles } = Astro.props;
+const { Content } = await render(article);
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const url = (path: string) => `${base}${path.startsWith('/') ? path : `/${path}`}`;
+
+const bookNum = article.data.book;
+const bookTitle = article.data.bookTitle;
+const roman = ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'];
+
+// Все статьи книги — для боковой навигации
+const bookArticles = allArticles
+  .filter((a) => a.data.book === bookNum)
+  .sort((a, b) => a.data.order - b.data.order);
+
+const navArticles = bookArticles.map((a) => {
+  const slug = a.data.number.replace(/\./g, '-');
+  return {
+    number: a.data.number,
+    title: a.data.title,
+    part: a.data.part,
+    partTitle: a.data.partTitle,
+    slug,
+    href: url(`/charter/kniga-${bookNum}/${slug}`),
+    isCurrent: a.data.number === article.data.number,
+  };
+});
+
+// Соседние статьи для навигации внизу
+const idx = bookArticles.findIndex((a) => a.data.number === article.data.number);
+const prev = idx > 0 ? bookArticles[idx - 1] : null;
+const next = idx < bookArticles.length - 1 ? bookArticles[idx + 1] : null;
+
+function slugOf(a: typeof article) {
+  return a.data.number.replace(/\./g, '-');
+}
+
+const title = `Статья ${article.data.number}. ${article.data.title}`;
+const description = `${article.data.title} — Хартия 5.0, Книга ${roman[bookNum]}, Часть ${article.data.part}.`;
+---
+
+<BaseLayout title={title} description={description}>
+  <div class="charter-layout container">
+    <CharterNav
+      book={bookNum}
+      bookTitle={bookTitle}
+      bookHref={url(`/charter/kniga-${bookNum}`)}
+      articles={navArticles}
+    />
+
+    <main class="charter-main">
+      <nav class="crumbs mono">
+        <a href={url('/charter')}>Хартия</a>
+        <span class="crumbs__sep">/</span>
+        <a href={url(`/charter/kniga-${bookNum}`)}>Книга {roman[bookNum]}</a>
+        <span class="crumbs__sep">/</span>
+        <span>Статья {article.data.number}</span>
+      </nav>
+
+      <header class="article-head">
+        <p class="article-head__meta mono">
+          <span>Часть {article.data.part}</span>
+          <span class="article-head__meta-sep">·</span>
+          <span>{article.data.partTitle}</span>
+        </p>
+
+        <h1 class="article-head__title">
+          <span class="article-head__num mono">{article.data.number}.</span>
+          {article.data.title}
+        </h1>
+
+        {article.data.source && (
+          <p class="article-head__source mono">({article.data.source})</p>
+        )}
+      </header>
+
+      <article class="article-body">
+        <Content />
+      </article>
+
+      {(prev || next) && (
+        <nav class="article-pager">
+          {prev ? (
+            <a
+              href={url(`/charter/kniga-${bookNum}/${slugOf(prev)}`)}
+              class="article-pager__item article-pager__item--prev"
+            >
+              <span class="article-pager__label mono">← Предыдущая</span>
+              <span class="article-pager__title">
+                {prev.data.number}. {prev.data.title}
+              </span>
+            </a>
+          ) : <span />}
+
+          {next ? (
+            <a
+              href={url(`/charter/kniga-${bookNum}/${slugOf(next)}`)}
+              class="article-pager__item article-pager__item--next"
+            >
+              <span class="article-pager__label mono">Следующая →</span>
+              <span class="article-pager__title">
+                {next.data.number}. {next.data.title}
+              </span>
+            </a>
+          ) : <span />}
+        </nav>
+      )}
+    </main>
+  </div>
+</BaseLayout>
+
+<style>
+  .charter-layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 3rem;
+    padding-block: 3rem 5rem;
+    align-items: start;
+  }
+
+  .charter-main { min-width: 0; }
+
+  .crumbs {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-bottom: 2.5rem;
+  }
+
+  .crumbs a { color: var(--text-secondary); }
+  .crumbs a:hover { color: var(--gold-bright); }
+  .crumbs__sep { margin-inline: 0.5rem; color: var(--gold-dim); }
+
+  .article-head {
+    margin-bottom: 3rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--gold-dim);
+  }
+
+  .article-head__meta {
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+  }
+
+  .article-head__meta-sep {
+    margin-inline: 0.5rem;
+    color: var(--gold-dim);
+  }
+
+  .article-head__title {
+    font-size: clamp(1.75rem, 4vw, 2.75rem);
+    line-height: 1.15;
+    margin-bottom: 0.75rem;
+  }
+
+  .article-head__num {
+    color: var(--gold);
+    margin-right: 0.35rem;
+  }
+
+  .article-head__source {
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+  }
+
+  .article-body {
+    font-family: var(--font-body);
+    font-size: 1.05rem;
+    line-height: 1.75;
+    color: var(--text-primary);
+    white-space: pre-line;
+  }
+
+  .article-body :global(p) { margin-bottom: 1em; }
+
+  .article-body :global(strong) {
+    color: var(--gold-bright);
+    font-weight: 500;
+  }
+
+  .article-pager {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 5rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--gold-dim);
+  }
+
+  .article-pager__item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1rem 1.25rem;
+    border: 1px solid var(--gold-dim);
+    transition: all var(--transition);
+    min-height: 5rem;
+  }
+
+  .article-pager__item:hover {
+    border-color: var(--gold);
+    background: var(--bg-subtle);
+  }
+
+  .article-pager__item--next { text-align: right; }
+
+  .article-pager__label {
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    color: var(--gold);
+    text-transform: uppercase;
+  }
+
+  .article-pager__title {
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    color: var(--text-primary);
+    line-height: 1.3;
+  }
+
+  @media (max-width: 960px) {
+    .charter-layout {
+      grid-template-columns: 1fr;
+      gap: 0;
+      padding-block: 2rem 3rem;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .article-pager { grid-template-columns: 1fr; }
+    .article-pager__item--next { text-align: left; }
+  }
+</style>

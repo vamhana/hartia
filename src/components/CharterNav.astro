@@ -1,0 +1,177 @@
+---
+interface NavArticle {
+  number: string;
+  title: string;
+  part: number;
+  partTitle: string;
+  slug: string;   // '1-10'
+  href: string;   // '/hartia/charter/kniga-1/1-10'
+  isCurrent: boolean;
+}
+
+interface Props {
+  book: number;
+  bookTitle: string;
+  bookHref: string;
+  articles: NavArticle[];
+}
+
+const { book, bookTitle, bookHref, articles } = Astro.props;
+
+// Сгруппировать по частям
+const byPart: Record<number, { partTitle: string; items: NavArticle[] }> = {};
+for (const a of articles) {
+  if (!byPart[a.part]) {
+    byPart[a.part] = { partTitle: a.partTitle, items: [] };
+  }
+  byPart[a.part].items.push(a);
+}
+
+const parts = Object.keys(byPart)
+  .map(Number)
+  .sort((a, b) => a - b);
+---
+
+<aside class="charter-nav">
+  <a href={bookHref} class="charter-nav__book">
+    <span class="charter-nav__book-label mono">Книга {book}</span>
+    <span class="charter-nav__book-title">{bookTitle}</span>
+  </a>
+
+  <nav class="charter-nav__toc">
+    {parts.map((partNum) => {
+      const group = byPart[partNum];
+      return (
+        <section class="charter-nav__part">
+          <h3 class="charter-nav__part-title">
+            <span class="mono">Часть {partNum}.</span> {group.partTitle}
+          </h3>
+          <ul class="charter-nav__list">
+            {group.items.map((a) => (
+              <li>
+                <a
+                  href={a.href}
+                  class:list={[
+                    'charter-nav__link',
+                    { 'is-current': a.isCurrent },
+                  ]}
+                >
+                  <span class="charter-nav__num mono">{a.number}</span>
+                  <span class="charter-nav__title">{a.title}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      );
+    })}
+  </nav>
+</aside>
+
+<style>
+  .charter-nav {
+    position: sticky;
+    top: 5rem;
+    max-height: calc(100vh - 6rem);
+    overflow-y: auto;
+    padding-right: 1rem;
+    border-right: 1px solid var(--gold-dim);
+  }
+
+  .charter-nav__book {
+    display: block;
+    padding-bottom: 1.25rem;
+    margin-bottom: 1.25rem;
+    border-bottom: 1px solid var(--gold-dim);
+    transition: color var(--transition);
+  }
+
+  .charter-nav__book:hover { color: var(--gold-bright); }
+
+  .charter-nav__book-label {
+    display: block;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    color: var(--gold);
+    margin-bottom: 0.35rem;
+  }
+
+  .charter-nav__book-title {
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    line-height: 1.2;
+    color: var(--text-primary);
+  }
+
+  .charter-nav__toc {
+    display: grid;
+    gap: 1.75rem;
+  }
+
+  .charter-nav__part-title {
+    font-family: var(--font-body);
+    font-weight: 400;
+    font-size: 0.8rem;
+    line-height: 1.4;
+    color: var(--text-muted);
+    margin-bottom: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .charter-nav__part-title .mono {
+    color: var(--gold-dim);
+    font-size: 0.7rem;
+  }
+
+  .charter-nav__list {
+    list-style: none;
+    display: grid;
+    gap: 0.15rem;
+  }
+
+  .charter-nav__link {
+    display: grid;
+    grid-template-columns: 2.5rem 1fr;
+    gap: 0.5rem;
+    padding: 0.4rem 0.5rem;
+    font-size: 0.88rem;
+    line-height: 1.35;
+    color: var(--text-secondary);
+    border-left: 2px solid transparent;
+    transition: all var(--transition);
+    border-radius: 2px;
+  }
+
+  .charter-nav__link:hover {
+    color: var(--text-primary);
+    background: var(--bg-subtle);
+  }
+
+  .charter-nav__link.is-current {
+    color: var(--gold-bright);
+    background: var(--bg-subtle);
+    border-left-color: var(--gold);
+  }
+
+  .charter-nav__num {
+    color: var(--gold-dim);
+    font-size: 0.7rem;
+    padding-top: 0.2rem;
+  }
+
+  .charter-nav__link.is-current .charter-nav__num {
+    color: var(--gold);
+  }
+
+  @media (max-width: 960px) {
+    .charter-nav {
+      position: static;
+      max-height: none;
+      border-right: none;
+      border-bottom: 1px solid var(--gold-dim);
+      padding: 1.5rem 0;
+      margin-bottom: 2rem;
+    }
+  }
+</style>

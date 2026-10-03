@@ -1,0 +1,156 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import '../../styles/global.css';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const url = (path: string) => `${base}${path.startsWith('/') ? path : `/${path}`}`;
+
+const articles = await getCollection('charter');
+
+// Группируем по книгам
+const byBook: Record<number, {
+  bookTitle: string;
+  count: number;
+  parts: Set<number>;
+}> = {};
+
+for (const a of articles) {
+  const n = a.data.book;
+  if (!byBook[n]) {
+    byBook[n] = { bookTitle: a.data.bookTitle, count: 0, parts: new Set() };
+  }
+  byBook[n].count += 1;
+  byBook[n].parts.add(a.data.part);
+}
+
+const roman = ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'];
+const books = Object.keys(byBook)
+  .map(Number)
+  .sort((a, b) => a - b)
+  .map((n) => ({
+    num: n,
+    roman: roman[n] || String(n),
+    title: byBook[n].bookTitle,
+    count: byBook[n].count,
+    parts: byBook[n].parts.size,
+  }));
+
+const title = 'Хартия';
+const description =
+  'Сводный регламент Хартии 5.0 — Протокол Цивилизации Будущего. ' +
+  'Восемь книг, 314 статей.';
+---
+
+<BaseLayout title={title} description={description}>
+  <section class="charter-hero">
+    <div class="container">
+      <p class="charter-hero__label mono">Сводный регламент · Модульная версия</p>
+      <h1 class="charter-hero__title">Хартия</h1>
+      <p class="charter-hero__sub">
+        Восемь книг. {articles.length} статей. Один протокол.
+        Читается по частям — от преамбулы до экспериментальных
+        протоколов Первой сотни.
+      </p>
+    </div>
+  </section>
+
+  <section class="books">
+    <div class="container">
+      <ul class="books__grid">
+        {books.map((b) => (
+          <li>
+            <a href={url(`/charter/kniga-${b.num}`)} class="book-card">
+              <span class="book-card__num mono">Книга {b.roman}</span>
+              <h2 class="book-card__title">{b.title}</h2>
+              <span class="book-card__meta">
+                {b.count} статей · {b.parts} частей
+              </span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .charter-hero {
+    padding-block: 5rem 4rem;
+    text-align: center;
+  }
+
+  .charter-hero__label {
+    color: var(--gold);
+    margin-bottom: 1.5rem;
+  }
+
+  .charter-hero__title {
+    font-size: clamp(2.5rem, 6vw, 4rem);
+    margin-bottom: 1.5rem;
+  }
+
+  .charter-hero__sub {
+    max-width: 56ch;
+    margin-inline: auto;
+    color: var(--text-secondary);
+    font-size: 1.05rem;
+    line-height: 1.7;
+  }
+
+  .books { padding-block: 2rem 5rem; }
+
+  .books__grid {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+  }
+
+  .book-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 2rem;
+    border: 1px solid var(--gold-dim);
+    background: var(--bg-raised);
+    transition: all var(--transition);
+  }
+
+  .book-card:hover {
+    border-color: var(--gold);
+    background: var(--bg-subtle);
+    transform: translateY(-2px);
+  }
+
+  .book-card__num {
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+    margin-bottom: 0.75rem;
+  }
+
+  .book-card__title {
+    font-size: 1.35rem;
+    margin-bottom: 1rem;
+    line-height: 1.2;
+    flex: 1;
+    transition: color var(--transition);
+  }
+
+  .book-card:hover .book-card__title { color: var(--gold-bright); }
+
+  .book-card__meta {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding-top: 1rem;
+    border-top: 1px solid var(--gold-dim);
+  }
+
+  @media (max-width: 720px) {
+    .books__grid { grid-template-columns: 1fr; }
+  }
+</style>
