@@ -19,7 +19,7 @@ const audioBase = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 const trackList = tracks.map((t) => ({
   ...t,
-  src: `${releaseBase}/${t.file}`,
+  src: `${audioBase}/audio/${t.file}`,
   href: `${audioBase}/music/${t.slug}`,
   cover: `${audioBase}${t.cover}`,
 }));

@@ -9,7 +9,8 @@ export interface Track {
   description: string;
 }
 
-export const release_base = 'https://github.com/vamhana/hartia/releases/download/audio-v1';
+// Локальные файлы в public/audio/ — нет CORS-проблем
+export const release_base = '';
 
 export const tracks: Track[] = [
   {
