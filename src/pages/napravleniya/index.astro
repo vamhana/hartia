@@ -1,0 +1,195 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import DirectionCard from '../../components/DirectionCard.astro';
+import { directions } from '../../data/directions';
+import '../../styles/global.css';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+const title = 'Направления';
+const description =
+  'Семнадцать направлений цивилизации: постоянные, временное и переходное. ' +
+  'Атлас Хартии 5.0.';
+
+const permanent = directions.filter((d) => d.status === 'permanent');
+const temporary = directions.filter((d) => d.status === 'temporary');
+const transitional = directions.filter((d) => d.status === 'transitional');
+---
+
+<BaseLayout title={title} description={description}>
+  <section class="atlas-hero">
+    <div class="container">
+      <p class="atlas-hero__label mono">Атлас · 17 направлений</p>
+      <h1 class="atlas-hero__title">Направления</h1>
+      <p class="atlas-hero__sub">
+        Каждое направление — зона профессиональной ответственности.
+        Четырнадцать постоянных, одно временное на период масштабирования,
+        одно переходное — Внешний шлюз, подлежащий роспуску.
+      </p>
+    </div>
+  </section>
+
+  <section class="atlas-section">
+    <div class="container">
+      <header class="section-head">
+        <span class="section-head__num mono">XIV</span>
+        <h2 class="section-head__title">Постоянные</h2>
+        <p class="section-head__sub">Бессрочные направления, ядро цивилизации.</p>
+      </header>
+
+      <ul class="dcards">
+        {permanent.map((d) => (
+          <li><DirectionCard direction={d} base={base} /></li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <section class="atlas-section">
+    <div class="container">
+      <header class="section-head section-head--cyan">
+        <span class="section-head__num mono">I</span>
+        <h2 class="section-head__title">Временное</h2>
+        <p class="section-head__sub">
+          Существует на период масштабирования. Функции потом передаются
+          в Кибернетику и Протокол.
+        </p>
+      </header>
+
+      <ul class="dcards dcards--single">
+        {temporary.map((d) => (
+          <li><DirectionCard direction={d} base={base} /></li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <section class="atlas-section">
+    <div class="container">
+      <header class="section-head section-head--transitional">
+        <span class="section-head__num mono">I</span>
+        <h2 class="section-head__title">Переходное</h2>
+        <p class="section-head__sub">
+          Внешний шлюз. Изолирован от четырнадцати направлений,
+          существует, пока цивилизация не станет самодостаточной.
+        </p>
+      </header>
+
+      <ul class="dcards dcards--single">
+        {transitional.map((d) => (
+          <li><DirectionCard direction={d} base={base} /></li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <section class="atlas-note">
+    <div class="container prose">
+      <p>
+        Описания направлений составлены на основе Книги I Хартии
+        (статьи 4.0 – 4.18). <em>Зоны профессиональной ответственности</em>
+        {' '}— реконструкция на основе статьи 4.0.5 и описаний направлений;
+        в тексте Хартии они заданы общими принципами, а не явным списком.
+      </p>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .atlas-hero {
+    padding-block: 5rem 3rem;
+    text-align: center;
+  }
+
+  .atlas-hero__label {
+    color: var(--gold);
+    margin-bottom: 1.5rem;
+  }
+
+  .atlas-hero__title {
+    font-size: clamp(2.5rem, 6vw, 4rem);
+    margin-bottom: 1.5rem;
+  }
+
+  .atlas-hero__sub {
+    max-width: 62ch;
+    margin-inline: auto;
+    color: var(--text-secondary);
+    font-size: 1.05rem;
+    line-height: 1.7;
+  }
+
+  .atlas-section { padding-block: 3rem; }
+
+  .section-head {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-rows: auto auto;
+    column-gap: 1.25rem;
+    row-gap: 0.25rem;
+    align-items: baseline;
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--gold-dim);
+  }
+
+  .section-head--cyan { border-bottom-color: var(--cyan); }
+  .section-head--cyan .section-head__num { color: var(--cyan); }
+  .section-head--cyan .section-head__title { color: var(--cyan); }
+
+  .section-head--transitional { border-bottom-color: var(--transitional); }
+  .section-head--transitional .section-head__num { color: var(--transitional); }
+  .section-head--transitional .section-head__title { color: var(--transitional); }
+
+  .section-head__num {
+    grid-row: 1 / 3;
+    padding-top: 0.6rem;
+    color: var(--gold);
+    font-size: 0.75rem;
+  }
+
+  .section-head__title { margin: 0; font-size: clamp(1.6rem, 3vw, 2.25rem); }
+
+  .section-head__sub {
+    font-style: italic;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    margin: 0;
+  }
+
+  .dcards {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+  }
+
+  .dcards--single {
+    grid-template-columns: minmax(0, 1fr);
+    max-width: 480px;
+  }
+
+  .atlas-note {
+    padding-block: 4rem;
+    margin-top: 3rem;
+    border-top: 1px solid var(--gold-dim);
+  }
+
+  .atlas-note p {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    line-height: 1.6;
+    text-align: center;
+  }
+
+  @media (max-width: 960px) {
+    .dcards { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (max-width: 640px) {
+    .dcards { grid-template-columns: 1fr; }
+    .section-head { grid-template-columns: 1fr; }
+    .section-head__num { grid-row: auto; padding-top: 0; }
+    .atlas-hero { padding-block: 3.5rem 2rem; }
+  }
+</style>
