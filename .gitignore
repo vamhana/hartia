@@ -22,3 +22,6 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# Charter backup (генерируется скриптом backlinks)
+src/content/charter_original/
