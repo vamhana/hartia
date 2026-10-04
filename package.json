@@ -9,8 +9,7 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro",
-    "postbuild": "pagefind --site dist"
+    "astro": "astro"
   },
   "dependencies": {
     "@astrojs/markdown-satteri": "^0.4.2",
