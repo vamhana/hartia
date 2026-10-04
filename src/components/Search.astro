@@ -53,20 +53,33 @@
     return `${base}${path.startsWith('/') ? path : `/${path}`}`;
   }
 
+  // Обход Vite: new Function создаёт код вне его обработки,
+  // поэтому import() здесь не будет преобразован в __VITE_PRELOAD__
+  const dynamicImport = new Function('url', 'return import(url)') as
+    (url: string) => Promise<any>;
+
   async function loadPagefind() {
     if (pagefind || pagefindLoading) return pagefind;
     pagefindLoading = true;
+
+    const url = baseUrl('/pagefind/pagefind.js');
+
     try {
-      // В продакшене pagefind.js лежит в /pagefind/pagefind.js
-      // В base-режиме путь с префиксом
-      pagefind = await import(/* @vite-ignore */ baseUrl('/pagefind/pagefind.js'));
-      await pagefind.init();
+      console.log('[search] loading', url);
+      const mod = await dynamicImport(url);
+
+      // Отключаем встроенный Web Worker — с base=/hartia он часто падает
+      await mod.options({ noWorker: true });
+      await mod.init();
+
+      console.log('[search] pagefind ready');
+      pagefind = mod;
+      pagefindLoading = false;
       return pagefind;
     } catch (e) {
-      pagefind = null;
-      return null;
-    } finally {
+      console.error('[search] failed', url, e);
       pagefindLoading = false;
+      return null;
     }
   }
 
