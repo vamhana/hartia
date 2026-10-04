@@ -1,5 +1,6 @@
 ---
 import Search from '../components/Search.astro';
+import TelegramButton from '../components/TelegramButton.astro';
 interface Props {
   title: string;
   description?: string;
@@ -148,6 +149,7 @@ const jsonLd = {
             aria-live="polite"
           ></span>
         </p>
+        <TelegramButton />
       </div>
     </footer>
 

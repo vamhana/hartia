@@ -1,0 +1,75 @@
+---
+import { TELEGRAM_URL, TELEGRAM_LABEL, TELEGRAM_HINT } from '../data/links';
+
+const enabled = TELEGRAM_URL && TELEGRAM_URL.startsWith('http');
+---
+
+{enabled && (
+  <a
+    href={TELEGRAM_URL}
+    class="tg"
+    target="_blank"
+    rel="noopener noreferrer"
+    title={TELEGRAM_HINT}
+  >
+    <svg
+      class="tg__icon"
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      aria-hidden="true"
+    >
+      <path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z"/>
+    </svg>
+    <span class="tg__label">{TELEGRAM_LABEL}</span>
+    <span class="tg__arrow" aria-hidden="true">↗</span>
+  </a>
+)}
+
+<style>
+  .tg {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.7rem 1.2rem;
+    margin-top: 1.5rem;
+    border: 1px solid var(--gold-dim);
+    background: transparent;
+    color: var(--gold);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .tg:hover {
+    border-color: var(--gold);
+    color: var(--gold-bright);
+    background: var(--bg-subtle);
+  }
+
+  .tg__icon {
+    flex-shrink: 0;
+    transition: transform 250ms;
+  }
+
+  .tg:hover .tg__icon {
+    transform: translateY(-2px);
+  }
+
+  .tg__label {
+    white-space: nowrap;
+  }
+
+  .tg__arrow {
+    color: var(--gold-dim);
+    transition: all 250ms;
+  }
+
+  .tg:hover .tg__arrow {
+    color: var(--gold);
+    transform: translate(2px, -2px);
+  }
+</style>
