@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import DirectionCard from '../../components/DirectionCard.astro';
+import DirectionGraph from '../../components/DirectionGraph.astro';
 import { directions } from '../../data/directions';
 import '../../styles/global.css';
 
@@ -26,6 +27,12 @@ const transitional = directions.filter((d) => d.status === 'transitional');
         Четырнадцать постоянных, одно временное на период масштабирования,
         одно переходное — Внешний шлюз, подлежащий роспуску.
       </p>
+    </div>
+  </section>
+
+  <section class="atlas-graph">
+    <div class="container">
+      <DirectionGraph />
     </div>
   </section>
 
