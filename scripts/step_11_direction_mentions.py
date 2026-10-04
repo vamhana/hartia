@@ -24,7 +24,14 @@ OUT = ROOT / "src" / "data" / "direction-mentions.json"
 # ─── Стемы для поиска. Ключ — id направления, значение — список регексов ───
 PATTERNS: dict[int, list[str]] = {
     1:  [r"Жизнеобеспеч"],
-    2:  [r"\bЗдрави[еяюи]"],
+    2:  [
+        r"\bЗдрави[еяюи]",
+        r"\bЗдоров",
+        r"\bМедицин",
+        r"\bЛечен",
+        r"\bДиагност",
+        r"\bРеабилитац",
+    ],
     3:  [r"Энерги[ияю] и Сред", r"Энергия и Среда"],
     4:  [r"Трансляц"],
     5:  [r"Когнитивн\w*\s+Логист"],
@@ -130,7 +137,7 @@ def main() -> int:
             seen.add(key)
             unique.append(m)
         unique.sort(key=lambda x: (x["book"], x["number"]))
-        mentions[id_] = unique[:30]
+        mentions[id_] = unique[:50]
 
     if "--dry-run" not in sys.argv:
         OUT.parent.mkdir(parents=True, exist_ok=True)
