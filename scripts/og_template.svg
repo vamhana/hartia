@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <!-- Фон -->
+  <rect width="1200" height="630" fill="#0a0906"/>
+
+  <!-- Декоративная рамка -->
+  <rect x="40" y="40" width="1120" height="550"
+        fill="none" stroke="#4a3f2a" stroke-width="1"/>
+
+  <!-- Верхний левый угол -->
+  <text x="80" y="115"
+        font-family="Georgia, 'Times New Roman', serif"
+        font-size="32" fill="#c9a961">✦</text>
+
+  <text x="128" y="112"
+        font-family="Consolas, Menlo, 'Courier New', monospace"
+        font-size="18" fill="#c9a961" letter-spacing="6">ХАРТИЯ 5.0</text>
+
+  <!-- Верхний правый угол -->
+  <text x="1120" y="112" text-anchor="end"
+        font-family="Consolas, Menlo, 'Courier New', monospace"
+        font-size="13" fill="#6b6353" letter-spacing="3">ПРОТОКОЛ ЦИВИЛИЗАЦИИ БУДУЩЕГО</text>
+
+  <!-- Центральная цитата -->
+  <text x="80" y="270"
+        font-family="Georgia, 'Times New Roman', serif"
+        font-style="italic" font-size="42" fill="#e8dcc0">Мудрость без действия —</text>
+  <text x="80" y="328"
+        font-family="Georgia, 'Times New Roman', serif"
+        font-style="italic" font-size="42" fill="#e8dcc0">это бегство от реальности.</text>
+  <text x="80" y="386"
+        font-family="Georgia, 'Times New Roman', serif"
+        font-style="italic" font-size="42" fill="#e8dcc0">Действие без мудрости — хаос.</text>
+  <text x="80" y="444"
+        font-family="Georgia, 'Times New Roman', serif"
+        font-style="italic" font-size="42" fill="#e8dcc0">А мудрый бунт — высший</text>
+  <text x="80" y="502"
+        font-family="Georgia, 'Times New Roman', serif"
+        font-style="italic" font-size="42" fill="#e8dcc0">пилотаж свободы.</text>
+
+  <!-- Атрибуция -->
+  <text x="80" y="548"
+        font-family="Consolas, Menlo, 'Courier New', monospace"
+        font-size="14" fill="#c9a961" letter-spacing="4">— ПЕРВЫЙ АРХИТЕКТОР</text>
+
+  <!-- Нижняя полоса -->
+  <text x="80" y="580"
+        font-family="Consolas, Menlo, 'Courier New', monospace"
+        font-size="12" fill="#7fd4d4" letter-spacing="3">ЦИВИЛИЗАЦИЯ КАК ОТКРЫТЫЙ КОД</text>
+  <text x="1120" y="580" text-anchor="end"
+        font-family="Consolas, Menlo, 'Courier New', monospace"
+        font-size="12" fill="#6b6353" letter-spacing="2">vamhana.github.io/hartia</text>
+</svg>
