@@ -1,0 +1,551 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import DirectionCard from '../../components/DirectionCard.astro';
+import {
+  directions,
+  directionsById,
+  statusLabels,
+  statusHints,
+} from '../../data/directions';
+import '../../styles/global.css';
+
+import mentionsData from '../../data/direction-mentions.json';
+
+export async function getStaticPaths() {
+  return directions.map((d) => ({
+    params: { slug: d.slug },
+    props: { direction: d },
+  }));
+}
+
+const { direction } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const url = (p: string) => `${base}${p.startsWith('/') ? p : `/${p}`}`;
+
+// Соседние направления по id
+const idx = directions.findIndex((d) => d.id === direction.id);
+const prev = idx > 0 ? directions[idx - 1] : null;
+const next = idx < directions.length - 1 ? directions[idx + 1] : null;
+
+// Полный текст описания — из статьи 4.X в Хартии
+const charter = await getCollection('charter');
+const articleRef = direction.articleRef; // например "4.1"
+const refParts = articleRef.split('.');
+const refBook = 1;
+const refNumber = articleRef;
+
+const article = charter.find(
+  (a) => a.data.book === refBook && a.data.number === refNumber
+);
+
+let ArticleContent = null;
+if (article) {
+  const { Content } = await render(article);
+  ArticleContent = Content;
+}
+// Упоминания в Хартии
+const mentions = ((mentionsData as any)[String(direction.id)] || []).map(
+  (m: any) => ({
+    ...m,
+    href: url(`/charter/kniga-${m.book}/${m.number.replace(/\./g, '-')}`),
+  })
+);
+
+// Связанные направления
+const related = direction.related
+  .map((rid) => directionsById[rid])
+  .filter(Boolean);
+
+const pageTitle = `${direction.name} — направление ${direction.id}`;
+const pageDescription = direction.summary;
+---
+
+<BaseLayout title={pageTitle} description={pageDescription}>
+  <section class="dh">
+    <div class="container">
+      <nav class="crumbs mono">
+        <a href={url('/napravleniya')}>Направления</a>
+        <span class="crumbs__sep">/</span>
+        <span>{direction.name}</span>
+      </nav>
+
+      <div class="dh__row">
+        <div class="dh__icon" aria-hidden="true">{direction.icon}</div>
+
+        <div class="dh__info">
+          <p class="dh__num mono">Направление {String(direction.id).padStart(2, '0')}</p>
+          <h1 class="dh__title">{direction.name}</h1>
+          <p class="dh__summary">{direction.summary}</p>
+
+          <div class="dh__status" data-status={direction.status}>
+            <span class="dh__status-label">{statusLabels[direction.status]}</span>
+            <span class="dh__status-hint">{statusHints[direction.status]}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="zpo">
+    <div class="container">
+      <header class="section-head">
+        <span class="section-head__num mono">ЗПО</span>
+        <h2 class="section-head__title">Зона профессиональной ответственности</h2>
+        <p class="section-head__sub">
+          Реконструкция на основе Хартии, Книга I, Статья 4.0.5.
+        </p>
+      </header>
+
+      <div class="zpo__grid">
+        <div class="zpo__col zpo__col--exclusive">
+          <h3 class="zpo__label">
+            <span class="zpo__marker" aria-hidden="true"></span>
+            Исключительная
+          </h3>
+          <p class="zpo__hint">Только это направление решает.</p>
+          <ul class="zpo__list">
+            {direction.zpo.exclusive.map((item) => <li>{item}</li>)}
+          </ul>
+        </div>
+
+        <div class="zpo__col zpo__col--shared">
+          <h3 class="zpo__label">
+            <span class="zpo__marker" aria-hidden="true"></span>
+            Разделяемая
+          </h3>
+          <p class="zpo__hint">Решается совместно с другими.</p>
+          <ul class="zpo__list">
+            {direction.zpo.shared.map((item) => <li>{item}</li>)}
+          </ul>
+        </div>
+
+        <div class="zpo__col zpo__col--adjacent">
+          <h3 class="zpo__label">
+            <span class="zpo__marker" aria-hidden="true"></span>
+            Смежная
+          </h3>
+          <p class="zpo__hint">Консультирует, но не исполняет.</p>
+          <ul class="zpo__list">
+            {direction.zpo.adjacent.map((item) => <li>{item}</li>)}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {ArticleContent && (
+    <section class="desc">
+      <div class="container prose">
+        <header class="section-head section-head--inline">
+          <span class="section-head__num mono">4.{direction.id}</span>
+          <h2 class="section-head__title">Из Хартии</h2>
+        </header>
+
+        <div class="desc__body">
+          <ArticleContent />
+        </div>
+
+        <p class="desc__link">
+          <a href={url(`/charter/kniga-1/${direction.articleRef.replace(/\./g, '-')}`)}>
+            Открыть статью {direction.articleRef} в Хартии →
+          </a>
+        </p>
+      </div>
+    </section>
+  )}
+
+  {related.length > 0 && (
+    <section class="related">
+      <div class="container">
+        <header class="section-head">
+          <span class="section-head__num mono">→</span>
+          <h2 class="section-head__title">Связанные направления</h2>
+          <p class="section-head__sub">Смежные зоны ответственности и партнёры.</p>
+        </header>
+
+        <ul class="dcards">
+          {related.map((d) => (
+            <li><DirectionCard direction={d} base={base} /></li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  )}
+
+  {mentions.length > 0 && (
+    <section class="mentions">
+      <div class="container">
+        <header class="section-head">
+          <span class="section-head__num mono">§</span>
+          <h2 class="section-head__title">Упоминается в Хартии</h2>
+          <p class="section-head__sub">
+            {mentions.length} {mentions.length === 1 ? 'статья' : 'статей'}
+            {' '}— где встречается это направление.
+          </p>
+        </header>
+
+        <ul class="mentions__list">
+          {mentions.map((m) => (
+            <li class="mention">
+              <a href={m.href} class="mention__link">
+                <span class="mention__meta mono">
+                  Книга {m.book} · Статья {m.number}
+                </span>
+                <span class="mention__title">{m.title}</span>
+                <span class="mention__snippet">{m.snippet}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  )}
+
+  <nav class="pager">
+    <div class="container pager__inner">
+      {prev ? (
+        <a href={url(`/napravleniya/${prev.slug}`)} class="pager__item pager__item--prev">
+          <span class="pager__label mono">← Предыдущее</span>
+          <span class="pager__title">{prev.icon} {prev.name}</span>
+        </a>
+      ) : <span />}
+
+      <a href={url('/napravleniya')} class="pager__all mono">Все направления</a>
+
+      {next ? (
+        <a href={url(`/napravleniya/${next.slug}`)} class="pager__item pager__item--next">
+          <span class="pager__label mono">Следующее →</span>
+          <span class="pager__title">{next.icon} {next.name}</span>
+        </a>
+      ) : <span />}
+    </div>
+  </nav>
+</BaseLayout>
+
+<style>
+  /* ─── Hero ─── */
+  .dh { padding-block: 3rem 2rem; border-bottom: 1px solid var(--gold-dim); }
+
+  .crumbs {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-bottom: 2.5rem;
+  }
+  .crumbs a { color: var(--text-secondary); }
+  .crumbs a:hover { color: var(--gold-bright); }
+  .crumbs__sep { margin-inline: 0.5rem; color: var(--gold-dim); }
+
+  .dh__row {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 2.5rem;
+    align-items: start;
+  }
+
+  .dh__icon {
+    font-size: 5rem;
+    line-height: 1;
+    padding: 1rem;
+    border: 1px solid var(--gold-dim);
+    background: var(--bg-raised);
+    min-width: 7rem;
+    text-align: center;
+  }
+
+  .dh__num { color: var(--gold); font-size: 0.75rem; letter-spacing: 0.15em; margin-bottom: 0.75rem; }
+
+  .dh__title {
+    font-size: clamp(2rem, 5vw, 3.25rem);
+    line-height: 1.1;
+    margin-bottom: 1rem;
+  }
+
+  .dh__summary {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+    max-width: 60ch;
+  }
+
+  .dh__status {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    padding: 0.75rem 1rem;
+    border-left: 3px solid var(--gold);
+    background: var(--bg-raised);
+  }
+  .dh__status[data-status='temporary'] { border-color: var(--cyan); }
+  .dh__status[data-status='transitional'] { border-color: var(--transitional); }
+
+  .dh__status-label {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+  .dh__status[data-status='temporary'] .dh__status-label { color: var(--cyan); }
+  .dh__status[data-status='transitional'] .dh__status-label { color: var(--transitional); }
+
+  .dh__status-hint {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-style: italic;
+  }
+
+  /* ─── Общий заголовок секций ─── */
+  .section-head {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-rows: auto auto;
+    column-gap: 1.25rem;
+    row-gap: 0.25rem;
+    align-items: baseline;
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--gold-dim);
+  }
+
+  .section-head--inline {
+    grid-template-rows: auto;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    margin-bottom: 2rem;
+  }
+  .section-head--inline .section-head__num { padding-top: 0; }
+
+  .section-head__num {
+    grid-row: 1 / 3;
+    padding-top: 0.6rem;
+    color: var(--gold);
+    font-size: 0.75rem;
+  }
+  .section-head__title { margin: 0; font-size: clamp(1.5rem, 3vw, 2.15rem); }
+  .section-head__sub {
+    font-style: italic;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    margin: 0;
+  }
+
+  /* ─── ZPO ─── */
+  .zpo { padding-block: 4rem 3rem; }
+
+  .zpo__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+  }
+
+  .zpo__col {
+    padding: 1.75rem;
+    border: 1px solid var(--gold-dim);
+    background: var(--bg-raised);
+  }
+
+  .zpo__col--exclusive { border-left: 3px solid var(--gold); }
+  .zpo__col--shared { border-left: 3px solid var(--cyan); }
+  .zpo__col--adjacent { border-left: 3px solid var(--text-muted); }
+
+  .zpo__label {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    font-weight: 500;
+    color: var(--gold-bright);
+    margin-bottom: 0.5rem;
+  }
+
+  .zpo__col--shared .zpo__label { color: var(--cyan); }
+  .zpo__col--adjacent .zpo__label { color: var(--text-secondary); }
+
+  .zpo__marker {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  .zpo__hint {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-style: italic;
+    margin-bottom: 1.25rem;
+  }
+
+  .zpo__list {
+    list-style: none;
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .zpo__list li {
+    padding-left: 1rem;
+    position: relative;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    font-size: 0.95rem;
+  }
+
+  .zpo__list li::before {
+    content: '—';
+    position: absolute;
+    left: 0;
+    color: var(--gold-dim);
+  }
+
+  /* ─── Описание из Хартии ─── */
+  .desc { padding-block: 3rem 4rem; border-top: 1px solid var(--gold-dim); }
+
+  .desc__body {
+    font-family: var(--font-body);
+    font-size: 1.05rem;
+    line-height: 1.75;
+    color: var(--text-primary);
+    white-space: pre-line;
+  }
+
+  .desc__body :global(p) { margin-bottom: 1em; }
+
+  .desc__link {
+    margin-top: 2rem;
+    text-align: right;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  /* ─── Связанные направления ─── */
+  .related { padding-block: 3rem; }
+
+  .related .dcards {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+  }
+
+  /* ─── Упоминания ─── */
+  .mentions { padding-block: 3rem; }
+
+  .mentions__list {
+    list-style: none;
+    display: grid;
+    gap: 0.5rem;
+  }
+
+  .mention { border-bottom: 1px solid var(--gold-dim); }
+
+  .mention__link {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: 1.5rem;
+    padding: 1rem 0.5rem;
+    transition: all 200ms;
+    align-items: baseline;
+  }
+
+  .mention__link:hover {
+    background: var(--bg-subtle);
+    padding-left: 1rem;
+  }
+
+  .mention__meta {
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    color: var(--gold);
+    grid-row: 1 / 3;
+    padding-top: 0.25rem;
+  }
+
+  .mention__title {
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    color: var(--text-primary);
+    line-height: 1.3;
+  }
+
+  .mention__link:hover .mention__title { color: var(--gold-bright); }
+
+  .mention__snippet {
+    grid-column: 2;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    font-style: italic;
+    line-height: 1.5;
+  }
+
+  /* ─── Pager ─── */
+  .pager {
+    margin-top: 5rem;
+    padding-block: 2.5rem;
+    border-top: 1px solid var(--gold-dim);
+    background: var(--bg-raised);
+  }
+
+  .pager__inner {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 2rem;
+    align-items: center;
+  }
+
+  .pager__item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    padding: 0.75rem 0;
+  }
+  .pager__item--next { text-align: right; }
+
+  .pager__label {
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    color: var(--gold);
+    text-transform: uppercase;
+  }
+
+  .pager__title {
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    color: var(--text-primary);
+    transition: color 200ms;
+  }
+
+  .pager__item:hover .pager__title { color: var(--gold-bright); }
+
+  .pager__all {
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+  }
+  .pager__all:hover { color: var(--gold); }
+
+  /* ─── Адаптив ─── */
+  @media (max-width: 960px) {
+    .zpo__grid { grid-template-columns: 1fr; }
+    .related .dcards { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (max-width: 720px) {
+    .dh__row { grid-template-columns: 1fr; gap: 1.25rem; }
+    .dh__icon { font-size: 3rem; min-width: auto; padding: 0.5rem 1rem; width: fit-content; }
+    .section-head { grid-template-columns: 1fr; }
+    .section-head__num { grid-row: auto; padding-top: 0; }
+    .mention__link { grid-template-columns: 1fr; gap: 0.5rem; }
+    .mention__meta { grid-row: auto; }
+    .mention__snippet { grid-column: 1; }
+    .related .dcards { grid-template-columns: 1fr; }
+    .pager__inner { grid-template-columns: 1fr; gap: 1rem; text-align: center; }
+    .pager__item--next { text-align: center; }
+  }
+</style>
