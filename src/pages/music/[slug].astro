@@ -7,10 +7,10 @@ import '../../styles/global.css';
 import { tracks, release_base } from '../../data/tracks';
 
 export async function getStaticPaths() {
-  return tracks.map((t) => ({
-    params: { slug: t.slug },
-    props: { track: t, allTracks: tracks },
-  }));
+return tracks.map((t) => ({
+params: { slug: t.slug },
+props: { track: t, allTracks: tracks },
+}));
 }
 
 const { track, allTracks } = Astro.props;
@@ -20,8 +20,8 @@ const lyricsEntry = lyrics.find((e) => e.id === track.slug);
 
 let Content = null;
 if (lyricsEntry) {
-  const rendered = await render(lyricsEntry);
-  Content = rendered.Content;
+const rendered = await render(lyricsEntry);
+Content = rendered.Content;
 }
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
@@ -30,36 +30,68 @@ const downloadUrl = `${release_base}/${track.file}`;
 
 const others = allTracks.filter((t) => t.slug !== track.slug);
 
+// Абсолютные URL для структурированных данных
+const SITE = 'https://vamhana.github.io';
+const absoluteDownload = new URL(downloadUrl, SITE).href;
+const absoluteCover = new URL(coverUrl, SITE).href;
+const pageUrl = new URL(`${base}/music/${track.slug}`, SITE).href;
+
+// "3:45" → "PT3M45S" (ISO 8601)
+function toIsoDuration(d) {
+const [m, s] = d.split(':').map(Number);
+return `PT${m}M${s}S`;
+}
+
+const jsonLd = {
+"@context": "https://schema.org",
+"@type": "MusicRecording",
+"name": track.title,
+"byArtist": { "@type": "MusicGroup", "name": "Hartia" },
+"duration": toIsoDuration(track.duration),
+"datePublished": String(track.year),
+"genre": track.tags,
+"description": track.description,
+"image": absoluteCover,
+"url": pageUrl,
+"inLanguage": "ru",
+"audio": {
+"@type": "AudioObject",
+"contentUrl": absoluteDownload,
+"encodingFormat": "audio/mpeg"
+}
+};
+
 const pageTitle = `${track.title} — текст и скачать`;
 const pageDesc = track.description;
 ---
 
 <BaseLayout title={pageTitle} description={pageDesc}>
-  <section class="track">
-    <div class="container">
-      <nav class="track__crumbs mono">
-        <a href={`${base}/music`}>Музыка</a>
-        <span class="track__crumbs-sep">/</span>
-        <span>{track.title}</span>
-      </nav>
+<script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+<section class="track">
+<div class="container">
+<nav class="track__crumbs mono">
+<a href={`${base}/music`}>Музыка</a>
+<span class="track__crumbs-sep">/</span>
+<span>{track.title}</span>
+</nav>
 
-      <header class="track__head">
-        <div class="track__cover">
-          <img src={coverUrl} alt={track.title} />
-        </div>
+<header class="track__head">
+<div class="track__cover">
+<img src={coverUrl} alt={track.title} />
+</div>
 
-        <div class="track__meta">
-          <p class="track__label mono">{track.year} · {track.duration}</p>
-          <h1 class="track__title">{track.title}</h1>
-          <p class="track__desc">{track.description}</p>
+<div class="track__meta">
+<p class="track__label mono">{track.year} · {track.duration}</p>
+<h1 class="track__title">{track.title}</h1>
+<p class="track__desc">{track.description}</p>
 
-          <div class="track__tags">
-            {track.tags.map((tag) => (
-              <span class="track__tag mono">{tag}</span>
-            ))}
-          </div>
+<div class="track__tags">
+{track.tags.map((tag) => (
+<span class="track__tag mono">{tag}</span>
+))}
+</div>
 
-          <div class="track__actions">
+<div class="track__actions">
             <a
               href={downloadUrl}
               class="btn btn--primary"
