@@ -1,23 +1,23 @@
 ---
-import Поиск from '../components/Поиск.astro';
+import Search from '../components/Search.astro';
 import TelegramButton from '../components/TelegramButton.astro';
 
 interface Props {
-title: string;
-description?: string;
-ogType?: string;
-ogImage?: string;
-ogAudio?: string;
-jsonLd?: object | object[];
+  title: string;
+  description?: string;
+  ogType?: string;
+  ogImage?: string;
+  ogAudio?: string;
+  jsonLd?: object | object[];
 }
 
 const {
-title,
-description = 'Хартия 5.0 — протокол построения планетарной цивилизации, основанной на развитии, а не накоплении.',
-ogType = 'book',
-ogImage,
-ogAudio,
-jsonLd: extraJsonLd,
+  title,
+  description = 'Хартия 5.0 — протокол построения планетарной цивилизации, основанной на развитии, а не накоплении.',
+  ogType = 'book',
+  ogImage,
+  ogAudio,
+  jsonLd: extraJsonLd,
 } = Astro.props;
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
@@ -29,86 +29,86 @@ const SITE_URL = 'https://vamhana.github.io/hartia';
 const AUTHOR = 'Первый Архитектор';
 
 const pageTitle = title === SITE_TITLE
-? `${SITE_TITLE} — ${SITE_SUBTITLE}`
-: `${title} — ${SITE_TITLE}`;
+  ? `${SITE_TITLE} — ${SITE_SUBTITLE}`
+  : `${title} — ${SITE_TITLE}`;
 
 const canonical = new URL(Astro.url.pathname, SITE_URL).toString();
 
 const ogImageFinal = ogImage ?? `${SITE_URL}/og-image.png`;
 
 const defaultJsonLd = {
-'@context': 'https://schema.org',
-'@type': 'Book',
-name: `${SITE_TITLE} — ${SITE_SUBTITLE}`,
-alternateName: 'Xartia 5.0',
-author: { '@type': 'Person', name: AUTHOR },
-inLanguage: 'ru',
-genre: ['Философия', 'Социальная архитектура', 'Футурология'],
-abstract: description,
-url: SITE_URL,
+  '@context': 'https://schema.org',
+  '@type': 'Book',
+  name: `${SITE_TITLE} — ${SITE_SUBTITLE}`,
+  alternateName: 'Xartia 5.0',
+  author: { '@type': 'Person', name: AUTHOR },
+  inLanguage: 'ru',
+  genre: ['Философия', 'Социальная архитектура', 'Футурология'],
+  abstract: description,
+  url: SITE_URL,
 };
 
 const jsonLdBlocks = extraJsonLd
-? (Array.isArray(extraJsonLd) ? extraJsonLd : [extraJsonLd])
-: [defaultJsonLd];
+  ? (Array.isArray(extraJsonLd) ? extraJsonLd : [extraJsonLd])
+  : [defaultJsonLd];
 ---
 
 <!doctype html>
 <html lang="ru">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-<title>{pageTitle}</title>
-<meta name="description" content={description} />
-<meta name="author" content={AUTHOR} />
-<meta name="generator" content={Astro.generator} />
-<meta name="yandex-verification" content="51a5ef9013f2d13f" />
-<link rel="canonical" href={canonical} />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <meta name="author" content={AUTHOR} />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="yandex-verification" content="51a5ef9013f2d13f" />
+    <link rel="canonical" href={canonical} />
 
-<!-- Открыть Graph -->
-<meta property="og:type" content={ogType} />
-<meta property="og:title" content={pageTitle} />
-<meta property="og:description" content={description} />
-<meta property="og:url" content={canonical} />
-<meta property="og:site_name" content={`${SITE_TITLE} — ${SITE_SUBTITLE}`} />
-<meta property="og:locale" content="ru_RU" />
+    <!-- Open Graph -->
+    <meta property="og:type" content={ogType} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:site_name" content={`${SITE_TITLE} — ${SITE_SUBTITLE}`} />
+    <meta property="og:locale" content="ru_RU" />
 
-<!-- OG audio (только для музыкальных страниц) -->
-{ogAudio && <meta property="og:audio" content={ogAudio} />}
-{ogAudio && <meta property="og:audio:type" content="audio/mpeg" />}
+    <!-- OG audio (только для музыкальных страниц) -->
+    {ogAudio && <meta property="og:audio" content={ogAudio} />}
+    {ogAudio && <meta property="og:audio:type" content="audio/mpeg" />}
 
-<!-- Twitter -->
-<meta name="twitter:card" content={ogAudio ? 'player' : 'summary_large_image'} />
-<meta name="twitter:title" content={pageTitle} />
-<meta name="twitter:description" content={description} />
+    <!-- Twitter -->
+    <meta name="twitter:card" content={ogAudio ? 'player' : 'summary_large_image'} />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
 
-<!-- OG image -->
-<meta property="og:image" content={ogImageFinal} />
-<meta property="og:image:type" content="image/png" />
-<meta property="og:image:width" content="1200" />
-<meta property="og:image:height" content="630" />
-<meta property="og:image:alt" content={pageTitle} />
+    <!-- OG image -->
+    <meta property="og:image" content={ogImageFinal} />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={pageTitle} />
 
-<meta name="twitter:image" content={ogImageFinal} />
-<meta name="twitter:image:alt" content={pageTitle} />
+    <meta name="twitter:image" content={ogImageFinal} />
+    <meta name="twitter:image:alt" content={pageTitle} />
 
-<!-- JSON-LD -->
-{jsonLdBlocks.map((block) => (
-<script type="application/ld+json" set:html={JSON.stringify(block)} />
-))}
+    <!-- JSON-LD -->
+    {jsonLdBlocks.map((block) => (
+      <script type="application/ld+json" set:html={JSON.stringify(block)} />
+    ))}
 
-<!-- Слот для дополнительных тегов со страниц -->
-<slot name="head" />
+    <!-- Слот для дополнительных тегов со страниц -->
+    <slot name="head" />
 
-<!-- GoatCounter Analytics -->
-{import.meta.env.PROD && (
-<script
-data-goatcounter="https://vamhana.goatcounter.com/count"
-async
-src="//gc.zgo.at/count.js"
-></script>
-)}
+    <!-- GoatCounter Analytics -->
+    {import.meta.env.PROD && (
+      <script
+        data-goatcounter="https://vamhana.goatcounter.com/count"
+        async
+        src="//gc.zgo.at/count.js"
+      ></script>
+    )}
 
     <link rel="icon" type="image/svg+xml" href={url('/favicon.svg')} />
 
@@ -302,80 +302,80 @@ src="//gc.zgo.at/count.js"
     padding: 6px;
   }
 
-.nav-toggle span {
-display: block;
-height: 1px;
-background: var(--gold);
-transition: all var(--transition);
-}
+  .nav-toggle span {
+    display: block;
+    height: 1px;
+    background: var(--gold);
+    transition: all var(--transition);
+  }
 
-.nav-toggle[aria-expanded="true"] span:nth-child(1) {
-transform: translateY(6px) rotate(45deg);
-}
-.nav-toggle[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
-.nav-toggle[aria-expanded="true"] span:nth-child(3) {
-transform: translateY(-6px) rotate(-45deg);
-}
+  .nav-toggle[aria-expanded="true"] span:nth-child(1) {
+    transform: translateY(6px) rotate(45deg);
+  }
+  .nav-toggle[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
+  .nav-toggle[aria-expanded="true"] span:nth-child(3) {
+    transform: translateY(-6px) rotate(-45deg);
+  }
 
-.site-main { flex: 1; }
+  .site-main { flex: 1; }
 
-.site-footer {
-border-top: 1px solid var(--gold-dim);
-padding-block: 3rem;
-margin-top: 6rem;
-background: var(--bg-raised);
-}
+  .site-footer {
+    border-top: 1px solid var(--gold-dim);
+    padding-block: 3rem;
+    margin-top: 6rem;
+    background: var(--bg-raised);
+  }
 
-.site-footer__inner {
-max-width: var(--max-w);
-margin-inline: auto;
-text-align: center;
-}
+  .site-footer__inner {
+    max-width: var(--max-w);
+    margin-inline: auto;
+    text-align: center;
+  }
 
-.site-footer__quote {
-font-family: var(--font-display);
-font-style: italic;
-font-size: 1.15rem;
-color: var(--text-secondary);
-margin-bottom: 1.5rem;
-line-height: 1.6;
-}
+  .site-footer__quote {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 1.15rem;
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+  }
 
-.site-footer__meta {
-font-family: var(--font-mono);
-font-size: 0.75rem;
-text-transform: uppercase;
-letter-spacing: 0.15em;
-color: var(--text-muted);
-}
+  .site-footer__meta {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--text-muted);
+  }
 
-.site-footer__sep { margin-inline: 0.6rem; color: var(--gold-dim); }
-.site-footer__counter {
-color: var(--cyan);
-font-variant-numeric: tabular-nums;
-}
+  .site-footer__sep { margin-inline: 0.6rem; color: var(--gold-dim); }
+  .site-footer__counter {
+    color: var(--cyan);
+    font-variant-numeric: tabular-nums;
+  }
 
-@media (max-width: 780px) {
-.nav-toggle { display: flex; }
-.brand__sub { display: none; }
+  @media (max-width: 780px) {
+    .nav-toggle { display: flex; }
+    .brand__sub { display: none; }
 
-.site-nav {
-position: fixed;
-inset: 0;
-background: var(--bg-deep);
-flex-direction: column;
-justify-content: center;
-align-items: center;
-gap: 2rem;
-font-size: 1.1rem;
-letter-spacing: 0.2em;
-transform: translateX(100%);
-transition: transform 250ms cubic-bezier(0.4, 0, 0.2, 1);
-z-index: 40;
-}
+    .site-nav {
+      position: fixed;
+      inset: 0;
+      background: var(--bg-deep);
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 2rem;
+      font-size: 1.1rem;
+      letter-spacing: 0.2em;
+      transform: translateX(100%);
+      transition: transform 250ms cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 40;
+    }
 
-.site-nav.is-open { transform: translateX(0); }
+    .site-nav.is-open { transform: translateX(0); }
 
-.site-nav a { font-size: 1.1rem; }
-}
+    .site-nav a { font-size: 1.1rem; }
+  }
 </style>
