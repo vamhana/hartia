@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-r"""Разбивает README.md на статьи. v2 — дедупликация + регистр ЧАСТЬ.
+r"""Разбивает charter.md на статьи. v2 — дедупликация + регистр ЧАСТЬ.
 
 Запуск:
     python scripts/parse_readme.py --dry-run
@@ -13,7 +13,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-README = ROOT / "README.md"
+SRC = ROOT / "charter.md"
 OUT_DIR = ROOT / "src" / "content" / "charter"
 FORCE = "--force" in sys.argv
 DRY_RUN = "--dry-run" in sys.argv
@@ -172,11 +172,11 @@ def clean_body(body_lines: list[str]) -> str:
 
 
 def main() -> int:
-    if not README.exists():
-        print(f"[ERR] нет {README}")
+    if not SRC.exists():
+        print(f"[ERR] нет {SRC}")
         return 1
 
-    lines = README.read_text(encoding="utf-8").splitlines()
+    lines = SRC.read_text(encoding="utf-8").splitlines()
     print(f"Файл: {len(lines)} строк")
     print()
 
