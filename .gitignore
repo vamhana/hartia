@@ -25,3 +25,7 @@ pnpm-debug.log*
 
 # Charter backup (генерируется скриптом backlinks)
 src/content/charter_original/
+
+# Python
+__pycache__/
+*.pyc
