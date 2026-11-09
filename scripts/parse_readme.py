@@ -10,6 +10,7 @@ r"""Разбивает charter.md на статьи. v2 — дедупликац
 
 import re
 import sys
+import subprocess
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -259,6 +260,11 @@ def main() -> int:
     print("  Проверь src/content/charter/kniga-1/1-1.md")
     print("  Если ок — пишем page-рендер.")
     print()
+    extra = ["--dry-run"] if DRY_RUN else []
+    subprocess.run(
+        [sys.executable, str(ROOT / "scripts" / "build_backlinks.py"), *extra],
+        check=True,
+    )
     return 0
 
 

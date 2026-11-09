@@ -13,7 +13,7 @@ r"""Строит обратные ссылки «Упоминается в» д�
 
 import re
 import sys
-import subprocess
+
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -83,7 +83,7 @@ def collect_refs(body: str) -> set[tuple[int, str]]:
 
 def build_backlinks() -> dict[tuple[int, str], list[tuple[int, str, str]]]:
     """target (book, num) → список источников (book, num, title)."""
-    articles = []  # (book, num, title, refs)
+    articles = []
     for path in CONTENT.rglob("*.md"):
         text = path.read_text(encoding="utf-8")
         fm, body = parse_frontmatter(text)
@@ -98,12 +98,30 @@ def build_backlinks() -> dict[tuple[int, str], list[tuple[int, str, str]]]:
         refs = collect_refs(body)
         articles.append((b, num, title, refs))
 
+    # Множество существующих статей — для fallback
+    existing = {(b, num) for b, num, _, _ in articles}
+
+    def resolve(book: int, num: str) -> tuple[int, str] | None:
+        """Точное совпадение → родитель (X.Y.Z → X.Y) → None."""
+        if (book, num) in existing:
+            return (book, num)
+        parts = num.split(".")
+        while len(parts) > 1:
+            parts.pop()
+            parent = ".".join(parts)
+            if (book, parent) in existing:
+                return (book, parent)
+        return None
+
     backlinks: dict[tuple[int, str], list[tuple[int, str, str]]] = {}
     for src_book, src_num, src_title, refs in articles:
-        for tgt in refs:
-            if tgt == (src_book, src_num):
+        for tgt_book, tgt_num in refs:
+            resolved = resolve(tgt_book, tgt_num)
+            if not resolved:
                 continue
-            backlinks.setdefault(tgt, []).append((src_book, src_num, src_title))
+            if resolved == (src_book, src_num):
+                continue
+            backlinks.setdefault(resolved, []).append((src_book, src_num, src_title))
     return backlinks
 
 
@@ -173,7 +191,7 @@ def main() -> int:
         print(f"\nБудет обновлено: {updated} файлов.")
     else:
         print(f"\nОбновлено: {updated} файлов.")
-    subprocess.run([sys.executable, str(ROOT / "scripts" / "build_backlinks.py")], check=True)
+
     return 0
 
 
