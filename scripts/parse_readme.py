@@ -22,6 +22,10 @@ DRY_RUN = "--dry-run" in sys.argv
 RE_BOOK = re.compile(r"^\s*КНИГА\s+([IVX]+)\.\s*(.+)$", re.IGNORECASE)
 RE_PART = re.compile(r"^\s*ЧАСТЬ\s+(\d+)\.\s*(.+)$", re.IGNORECASE)
 RE_ARTICLE = re.compile(r"^\s*Статья\s+([\d.]+)\.\s+(.+)$")
+RE_ZAVETY = re.compile(
+    r"^\s*НЕИЗМЕНЯЕМЫЕ\s+ЗАВЕТЫ\s+ВОСПИТАННИКА\s+ХАРТИИ\s*$",
+    re.IGNORECASE,
+)
 
 # «(из Хартии, Ст.57)» в конце заголовка
 RE_SOURCE = re.compile(r"\s*\(из\s+.+?\)\s*$")
@@ -90,7 +94,22 @@ def parse_articles(lines: list[str]) -> list[dict]:
                 "body": [],
             }
             continue
-
+        m_zavety = RE_ZAVETY.match(stripped)
+        if m_zavety and current_book == 5:
+            if current is not None:
+                articles.append(current)
+            current = {
+                "number": "1.0.6",
+                "title": "Неизменяемые заветы воспитанника Хартии",
+                "source": "преамбула Книги V",
+                "book": 5,
+                "book_title": current_book_title,
+                "part": 1,
+                "part_title": "",  # заполним ниже из соседей по part
+                "body": [],
+            }
+            continue
+            
         if current is not None:
             current["body"].append(line)
 
@@ -132,6 +151,15 @@ def sort_and_number(articles: list[dict]) -> dict[int, list[dict]]:
         arts.sort(key=sort_key)
         for i, a in enumerate(arts, 1):
             a["order"] = i
+
+    for book_num, arts in by_book.items():
+        title_by_part = {}
+        for a in arts:
+            if a["part"] and a["part_title"]:
+                title_by_part[a["part"]] = a["part_title"]
+        for a in arts:
+            if a["part"] and not a["part_title"]:
+                a["part_title"] = title_by_part.get(a["part"], "")
 
     return by_book
 
